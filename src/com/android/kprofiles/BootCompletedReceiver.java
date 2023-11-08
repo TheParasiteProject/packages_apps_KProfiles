@@ -17,13 +17,13 @@
 
 package com.android.kprofiles;
 
-import static com.android.kprofiles.battery.KprofilesSettingsFragment.IS_SUPPORTED;
-import static com.android.kprofiles.battery.KprofilesSettingsFragment.KPROFILES_AUTO_KEY;
-import static com.android.kprofiles.battery.KprofilesSettingsFragment.KPROFILES_AUTO_NODE;
-import static com.android.kprofiles.battery.KprofilesSettingsFragment.KPROFILES_MODES_KEY;
-import static com.android.kprofiles.battery.KprofilesSettingsFragment.KPROFILES_MODES_NODE;
-import static com.android.kprofiles.battery.KprofilesSettingsFragment.ON;
-import static com.android.kprofiles.battery.KprofilesSettingsFragment.OFF;
+import static com.android.kprofiles.Constants.IS_SUPPORTED;
+import static com.android.kprofiles.Constants.KPROFILES_AUTO_KEY;
+import static com.android.kprofiles.Constants.KPROFILES_AUTO_NODE;
+import static com.android.kprofiles.Constants.KPROFILES_MODES_KEY;
+import static com.android.kprofiles.Constants.KPROFILES_MODES_NODE;
+import static com.android.kprofiles.Constants.ON;
+import static com.android.kprofiles.Constants.OFF;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
