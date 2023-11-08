@@ -1,9 +1,9 @@
 package com.android.kprofiles.battery;
 
-import static com.android.kprofiles.battery.KprofilesSettingsFragment.INTENT_ACTION;
-import static com.android.kprofiles.battery.KprofilesSettingsFragment.KPROFILES_MODES_NODE;
-import static com.android.kprofiles.battery.KprofilesSettingsFragment.KPROFILES_MODES_KEY;
-import static com.android.kprofiles.battery.KprofilesSettingsFragment.IS_SUPPORTED;
+import static com.android.kprofiles.Constants.INTENT_ACTION;
+import static com.android.kprofiles.Constants.IS_SUPPORTED;
+import static com.android.kprofiles.Constants.KPROFILES_MODES_KEY;
+import static com.android.kprofiles.Constants.KPROFILES_MODES_NODE;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

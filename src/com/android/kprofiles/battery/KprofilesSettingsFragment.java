@@ -16,6 +16,16 @@
 
 package com.android.kprofiles.battery;
 
+import static com.android.kprofiles.Constants.INTENT_ACTION;
+import static com.android.kprofiles.Constants.IS_SUPPORTED;
+import static com.android.kprofiles.Constants.KPROFILES_AUTO_KEY;
+import static com.android.kprofiles.Constants.KPROFILES_AUTO_NODE;
+import static com.android.kprofiles.Constants.KPROFILES_MODES_KEY;
+import static com.android.kprofiles.Constants.KPROFILES_MODES_NODE;
+import static com.android.kprofiles.Constants.KPROFILES_MODES_INFO;
+import static com.android.kprofiles.Constants.ON;
+import static com.android.kprofiles.Constants.OFF;
+
 import android.app.ActionBar;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -40,21 +50,10 @@ import com.android.kprofiles.utils.FileUtils;
 
 public class KprofilesSettingsFragment extends PreferenceFragment implements
         OnPreferenceChangeListener {
-
     private SwitchPreferenceCompat kProfilesAutoPreference;
     private ListPreference kProfilesModesPreference;
     private Preference kProfilesModesInfo;
     private boolean mSelfChange = false;
-
-    public static final String INTENT_ACTION = "com.android.kprofiles.battery.KPROFILE_CHANGED";
-    public static final String KPROFILES_MODES_NODE = "/sys/kernel/kprofiles/kp_mode";
-    public static final String KPROFILES_AUTO_KEY = "kprofiles_auto";
-    public static final String KPROFILES_AUTO_NODE = "/sys/module/kprofiles/parameters/auto_kp";
-    public static final String KPROFILES_MODES_KEY = "kprofiles_modes";
-    public static final String KPROFILES_MODES_INFO = "pref_kprofiles_modes_info";
-    public static final String ON = "Y";
-    public static final String OFF = "N";
-    public static final boolean IS_SUPPORTED = FileUtils.fileExists(KPROFILES_MODES_NODE);
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
