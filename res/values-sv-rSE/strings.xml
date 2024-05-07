@@ -14,7 +14,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="kprofiles_title">KProfiler</string>
     <string name="kprofiles_summary">Hantera Kernelspace-profiler för att uppnå balansering när det gäller batteritid och prestanda</string>
-    <string name="kprofiles_auto_title">Använd automatiskt KProfiler</string>
+    <string name="kprofiles_auto_title">automatiskt KProfiler</string>
     <string name="kprofiles_auto_summary">Växla automatiskt till batteriläge när enhetsskärmen stängs av och tillbaka till standardprofilen när skärmen slås på</string>
     <string name="kprofiles_modes_title">KProfiler lägen</string>
     <string name="kprofiles_modes_none">Inga</string>

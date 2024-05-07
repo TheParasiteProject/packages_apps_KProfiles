@@ -14,7 +14,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="kprofiles_title">KProfiles</string>
     <string name="kprofiles_summary">Διαχείριση προφίλ Kernelspace για επίτευξη εξισορρόπησης όσον αφορά την διάρκεια ζωής και την απόδοση της μπαταρίας</string>
-    <string name="kprofiles_auto_title">Χρήση Αυτόματων KProfiles</string>
+    <string name="kprofiles_auto_title">Αυτόματων KProfiles</string>
     <string name="kprofiles_auto_summary">Αυτόματη εναλλαγή σε λειτουργία μπαταρίας όταν η οθόνη της συσκευής απενεργοποιείται και επιστροφή στο προεπιλεγμένο προφίλ όταν η οθόνη ενεργοποιείται</string>
     <string name="kprofiles_modes_title">Λειτουργίες KProfiles</string>
     <string name="kprofiles_modes_none">Καμία</string>

@@ -14,7 +14,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="kprofiles_title">KProfiles</string>
     <string name="kprofiles_summary">Gestión de los perfiles del Kernel para lograr un equilibrio en términos de autonomía de la batería y rendimiento</string>
-    <string name="kprofiles_auto_title">Usar Auto KProfiles</string>
+    <string name="kprofiles_auto_title">Auto KProfiles</string>
     <string name="kprofiles_auto_summary">Cambiar automáticamente al modo de batería cuando la pantalla del dispositivo se apaga y vuelve al perfil predeterminado cuando la pantalla se enciende</string>
     <string name="kprofiles_modes_title">Modos KProfiles</string>
     <string name="kprofiles_modes_none">Ninguno</string>

@@ -14,7 +14,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="kprofiles_title">KProfiles</string>
     <string name="kprofiles_summary">Mengelola profil Kernelspace untuk mendapatkan keseimbangan dari segi keiritan baterai maupun performa</string>
-    <string name="kprofiles_auto_title">Pakai KProfiles mode otomatis</string>
+    <string name="kprofiles_auto_title">KProfiles mode otomatis</string>
     <string name="kprofiles_auto_summary">Secara otomatis berganti ke mode baterai ketika layar ponsel dimatikan, dan kembali ke mode semula ketika layar dinyalakan</string>
     <string name="kprofiles_modes_title">Mode KProfiles</string>
     <string name="kprofiles_modes_none">Tidak ada</string>

@@ -14,7 +14,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="kprofiles_title">KProfile</string>
     <string name="kprofiles_summary">Kernelraumprofile verwalten, um ein Gleichgewicht in Bezug auf Batteriesicherung und -leistung zu erzielen</string>
-    <string name="kprofiles_auto_title">Auto-KProfile verwenden</string>
+    <string name="kprofiles_auto_title">Auto-KProfile</string>
     <string name="kprofiles_auto_summary">Beim Einschalten des Bildschirms automatisch in den Akku-Modus wechseln, wenn der Bildschirm ausgeschaltet wird und zurück zum Standardprofil</string>
     <string name="kprofiles_modes_title">KProfile Modi</string>
     <string name="kprofiles_modes_none">Keine</string>

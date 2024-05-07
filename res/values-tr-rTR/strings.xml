@@ -14,7 +14,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="kprofiles_title">KProfilleri</string>
     <string name="kprofiles_summary">Pil yedekleme ve performans açısından dengeleme sağlamak için Kernelspace profillerini yönetme</string>
-    <string name="kprofiles_auto_title">Otomatik KProfilleri Kullanın</string>
+    <string name="kprofiles_auto_title">Otomatik KProfilleri</string>
     <string name="kprofiles_auto_summary">Cihaz ekranı kapandığında otomatik olarak pil moduna geçer ve ekran açıldığında varsayılan profile geri döner</string>
     <string name="kprofiles_modes_title">KProfil Modları</string>
     <string name="kprofiles_modes_none">Hiçbiri</string>

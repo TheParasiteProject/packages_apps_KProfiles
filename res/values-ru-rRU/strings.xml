@@ -14,7 +14,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="kprofiles_title">Профили</string>
     <string name="kprofiles_summary">Управление профилями пространства ядра для достижения баланса с точки зрения сохранения батареи и производительности</string>
-    <string name="kprofiles_auto_title">Использовать автоматические профили</string>
+    <string name="kprofiles_auto_title">автоматические профили</string>
     <string name="kprofiles_auto_summary">Автоматическое переключение в режим работы от батареи при выключении экрана устройства и возврат к профилю по умолчанию при включении экрана</string>
     <string name="kprofiles_modes_title">Режимы профилей</string>
     <string name="kprofiles_modes_none">Нет</string>

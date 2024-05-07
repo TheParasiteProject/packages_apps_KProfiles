@@ -14,7 +14,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="kprofiles_title">KProfiles</string>
     <string name="kprofiles_summary">管理内核空间的配置文件以在电池续航和性能方面实现平衡</string>
-    <string name="kprofiles_auto_title">使用自动 KProfiles</string>
+    <string name="kprofiles_auto_title">自动 KProfiles</string>
     <string name="kprofiles_auto_summary">当屏幕关闭时自动切换到省电模式，并在屏幕开启时回到默认配置</string>
     <string name="kprofiles_modes_title">KProfiles 模式</string>
     <string name="kprofiles_modes_none">无</string>

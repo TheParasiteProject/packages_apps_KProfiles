@@ -14,7 +14,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="kprofiles_title">KProfiles</string>
     <string name="kprofiles_summary">Gerenciando os perfis do Kernelspace para alcançar o equilíbrio em termos do uso da bateria e desempenho</string>
-    <string name="kprofiles_auto_title">Usar perfis automáticos</string>
+    <string name="kprofiles_auto_title">perfis automáticos</string>
     <string name="kprofiles_auto_summary">Alternar automaticamente para o modo de bateria quando a tela do dispositivo desligar e voltar ao perfil padrão quando a tela ligar</string>
     <string name="kprofiles_modes_title">Modos KProfiles</string>
     <string name="kprofiles_modes_none">Nenhum</string>
