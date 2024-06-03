@@ -53,6 +53,9 @@
             <meta-data
                 android:name="com.android.settings.summary"
                 android:resource="@string/kprofiles_summary" />
+            <meta-data
+                android:name="com.android.settings.profile"
+                android:value="primary_profile_only" />
         </activity>
 
         <service
