@@ -3,6 +3,13 @@ package com.android.kprofiles;
 import com.android.kprofiles.utils.FileUtils;
 
 public final class Constants {
+    public class Mode {
+        public static final String NONE = "0";
+        public static final String BATTERY = "1";
+        public static final String BALANCED = "2";
+        public static final String PERFORMANCE = "3";
+    }
+
     public static final String INTENT_ACTION = "com.android.kprofiles.battery.KPROFILE_CHANGED";
     public static final String KPROFILES_AUTO_KEY = "kprofiles_auto";
     public static final String KPROFILES_AUTO_NODE = "/sys/module/kprofiles/parameters/auto_kp";

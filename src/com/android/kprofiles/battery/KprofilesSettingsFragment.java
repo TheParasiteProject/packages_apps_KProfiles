@@ -45,6 +45,7 @@ import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.PreferenceFragment;
 import androidx.preference.SwitchPreferenceCompat;
 
+import com.android.kprofiles.Constants.Mode;
 import com.android.kprofiles.R;
 import com.android.kprofiles.utils.FileUtils;
 
@@ -155,16 +156,16 @@ public class KprofilesSettingsFragment extends PreferenceFragment implements
         String descrpition = null;
         if (!IS_SUPPORTED) return getString(R.string.kprofiles_not_supported);
         switch (mode) {
-            case "0":
+            case Mode.NONE:
                 descrpition = getString(R.string.kprofiles_modes_none_description);
                 break;
-            case "1":
+            case Mode.BATTERY:
                 descrpition = getString(R.string.kprofiles_modes_battery_description);
                 break;
-            case "2":
+            case Mode.BALANCED:
                 descrpition = getString(R.string.kprofiles_modes_balanced_description);
                 break;
-            case "3":
+            case Mode.PERFORMANCE:
                 descrpition = getString(R.string.kprofiles_modes_performance_description);
                 break;
             default:
@@ -190,7 +191,7 @@ public class KprofilesSettingsFragment extends PreferenceFragment implements
 
         if (IS_SUPPORTED) {
             final String value = FileUtils.readOneLine(KPROFILES_MODES_NODE);
-            kProfilesModesPreference.setValue(value != null ? value : "0");
+            kProfilesModesPreference.setValue(value != null ? value : Mode.NONE);
             updateTitle(value);
         }
     }
