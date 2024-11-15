@@ -20,11 +20,11 @@ import static com.android.kprofiles.Constants.INTENT_ACTION;
 import static com.android.kprofiles.Constants.IS_SUPPORTED;
 import static com.android.kprofiles.Constants.KPROFILES_AUTO_KEY;
 import static com.android.kprofiles.Constants.KPROFILES_AUTO_NODE;
+import static com.android.kprofiles.Constants.KPROFILES_MODES_INFO;
 import static com.android.kprofiles.Constants.KPROFILES_MODES_KEY;
 import static com.android.kprofiles.Constants.KPROFILES_MODES_NODE;
-import static com.android.kprofiles.Constants.KPROFILES_MODES_INFO;
-import static com.android.kprofiles.Constants.ON;
 import static com.android.kprofiles.Constants.OFF;
+import static com.android.kprofiles.Constants.ON;
 
 import android.app.ActionBar;
 import android.content.BroadcastReceiver;
@@ -49,8 +49,8 @@ import com.android.kprofiles.Constants.Mode;
 import com.android.kprofiles.R;
 import com.android.kprofiles.utils.FileUtils;
 
-public class KprofilesSettingsFragment extends PreferenceFragment implements
-        OnPreferenceChangeListener {
+public class KprofilesSettingsFragment extends PreferenceFragment
+        implements OnPreferenceChangeListener {
     private SwitchPreferenceCompat kProfilesAutoPreference;
     private ListPreference kProfilesModesPreference;
     private Preference kProfilesModesInfo;
@@ -90,10 +90,10 @@ public class KprofilesSettingsFragment extends PreferenceFragment implements
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        final View view = LayoutInflater.from(getContext()).inflate(R.layout.kprofiles,
-                container, false);
+    public View onCreateView(
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final View view =
+                LayoutInflater.from(getContext()).inflate(R.layout.kprofiles, container, false);
         ((ViewGroup) view).addView(super.onCreateView(inflater, container, savedInstanceState));
         return view;
     }
@@ -106,7 +106,8 @@ public class KprofilesSettingsFragment extends PreferenceFragment implements
     @Override
     public void onResume() {
         super.onResume();
-        if (kProfilesAutoPreference == null || kProfilesModesPreference == null
+        if (kProfilesAutoPreference == null
+                || kProfilesModesPreference == null
                 || kProfilesModesInfo == null) return;
         updateValues();
     }
@@ -125,7 +126,8 @@ public class KprofilesSettingsFragment extends PreferenceFragment implements
                 final boolean enabled = (Boolean) newValue;
                 try {
                     FileUtils.writeLine(KPROFILES_AUTO_NODE, enabled ? ON : OFF);
-                } catch(Exception e) { }
+                } catch (Exception e) {
+                }
                 break;
             case KPROFILES_MODES_KEY:
                 final String value = (String) newValue;
@@ -136,7 +138,8 @@ public class KprofilesSettingsFragment extends PreferenceFragment implements
                     Intent intent = new Intent(INTENT_ACTION);
                     intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     getContext().sendBroadcastAsUser(intent, UserHandle.CURRENT);
-                } catch(Exception e) { }
+                } catch (Exception e) {
+                }
                 break;
         }
         return true;
@@ -176,11 +179,14 @@ public class KprofilesSettingsFragment extends PreferenceFragment implements
     }
 
     private void updateTitle(String value) {
-        Handler.getMain().post(() -> {
-            kProfilesModesInfo.setTitle(
-                String.format(getString(R.string.kprofiles_modes_description),
-                    modesDesc(value)));
-        });
+        Handler.getMain()
+                .post(
+                        () -> {
+                            kProfilesModesInfo.setTitle(
+                                    String.format(
+                                            getString(R.string.kprofiles_modes_description),
+                                            modesDesc(value)));
+                        });
     }
 
     private void updateValues() {
@@ -196,15 +202,16 @@ public class KprofilesSettingsFragment extends PreferenceFragment implements
         }
     }
 
-    private final BroadcastReceiver mServiceStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!INTENT_ACTION.equals(intent.getAction())) return;
-            if (mSelfChange) {
-                mSelfChange = false;
-                return;
-            }
-            updateValues();
-        }
-    };
+    private final BroadcastReceiver mServiceStateReceiver =
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (!INTENT_ACTION.equals(intent.getAction())) return;
+                    if (mSelfChange) {
+                        mSelfChange = false;
+                        return;
+                    }
+                    updateValues();
+                }
+            };
 }

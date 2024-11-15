@@ -124,30 +124,34 @@ public class KProfilesModesTileService extends TileService {
                 tile.setSubtitle(getResources().getString(R.string.kprofiles_modes_none));
                 break;
             case Mode.BATTERY:
-                tile.setContentDescription(getResources().getString(R.string.kprofiles_modes_battery));
+                tile.setContentDescription(
+                        getResources().getString(R.string.kprofiles_modes_battery));
                 tile.setSubtitle(getResources().getString(R.string.kprofiles_modes_battery));
                 break;
             case Mode.BALANCED:
-                tile.setContentDescription(getResources().getString(R.string.kprofiles_modes_balanced));
+                tile.setContentDescription(
+                        getResources().getString(R.string.kprofiles_modes_balanced));
                 tile.setSubtitle(getResources().getString(R.string.kprofiles_modes_balanced));
                 break;
             case Mode.PERFORMANCE:
-                tile.setContentDescription(getResources().getString(R.string.kprofiles_modes_performance));
+                tile.setContentDescription(
+                        getResources().getString(R.string.kprofiles_modes_performance));
                 tile.setSubtitle(getResources().getString(R.string.kprofiles_modes_performance));
                 break;
         }
         tile.updateTile();
     }
 
-    private final BroadcastReceiver mServiceStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!INTENT_ACTION.equals(intent.getAction())) return;
-            if (mSelfChange) {
-                mSelfChange = false;
-                return;
-            }
-            updateTileContent();
-        }
-    };
+    private final BroadcastReceiver mServiceStateReceiver =
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (!INTENT_ACTION.equals(intent.getAction())) return;
+                    if (mSelfChange) {
+                        mSelfChange = false;
+                        return;
+                    }
+                    updateTileContent();
+                }
+            };
 }

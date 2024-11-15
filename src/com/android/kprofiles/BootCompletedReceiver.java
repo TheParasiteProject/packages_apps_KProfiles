@@ -22,14 +22,14 @@ import static com.android.kprofiles.Constants.KPROFILES_AUTO_KEY;
 import static com.android.kprofiles.Constants.KPROFILES_AUTO_NODE;
 import static com.android.kprofiles.Constants.KPROFILES_MODES_KEY;
 import static com.android.kprofiles.Constants.KPROFILES_MODES_NODE;
-import static com.android.kprofiles.Constants.ON;
 import static com.android.kprofiles.Constants.OFF;
+import static com.android.kprofiles.Constants.ON;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
@@ -41,8 +41,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, Intent intent) {
-        if (DEBUG)
-            Log.d(TAG, "Received boot completed intent");
+        if (DEBUG) Log.d(TAG, "Received boot completed intent");
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -51,7 +50,9 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             FileUtils.writeLine(KPROFILES_AUTO_NODE, kProfilesAutoEnabled ? ON : OFF);
         }
         if (IS_SUPPORTED) {
-            String kProfileMode = sharedPrefs.getString(KPROFILES_MODES_KEY, FileUtils.readOneLine(KPROFILES_MODES_NODE));
+            String kProfileMode =
+                    sharedPrefs.getString(
+                            KPROFILES_MODES_KEY, FileUtils.readOneLine(KPROFILES_MODES_NODE));
             FileUtils.writeLine(KPROFILES_MODES_NODE, kProfileMode);
         }
     }
