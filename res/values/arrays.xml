@@ -13,7 +13,7 @@
      limitations under the License.
 -->
 <resources>
-
+    <!-- KProfiles Modes -->
     <string-array name="kprofiles_modes_entries">
         <item>@string/kprofiles_modes_none</item>
         <item>@string/kprofiles_modes_battery</item>
@@ -22,10 +22,10 @@
     </string-array>
 
     <string-array name="kprofiles_modes_values">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
+        <item>@string/kprofiles_modes_value_none</item>
+        <item>@string/kprofiles_modes_value_battery</item>
+        <item>@string/kprofiles_modes_value_balanced</item>
+        <item>@string/kprofiles_modes_value_performance</item>
     </string-array>
 
 </resources>

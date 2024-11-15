@@ -16,22 +16,33 @@
      xmlns:android="http://schemas.android.com/apk/res/android"
      android:title="@string/kprofiles_title">
 
+     <com.android.settingslib.widget.TopIntroPreference
+          android:key="@string/pref_key_intro"
+          android:title="@string/kprofiles_summary" />
+
+     <com.android.settingslib.widget.MainSwitchPreference
+          android:key="@string/pref_key_enabled"
+          android:title="@string/kprofiles_enabled_title"
+          android:defaultValue="@bool/kprofiles_enabled_default" />
+
      <SwitchPreferenceCompat
-          android:key="kprofiles_auto"
-          android:defaultValue="false"
+          android:key="@string/pref_key_auto"
+          android:defaultValue="@bool/kprofiles_auto_default"
           android:title="@string/kprofiles_auto_title"
-          android:summary="@string/kprofiles_auto_summary" />
+          android:summary="@string/kprofiles_auto_summary"
+          android:dependency="@string/pref_key_enabled" />
 
      <ListPreference
-          android:key="kprofiles_modes"
+          android:key="@string/pref_key_modes"
           android:entries="@array/kprofiles_modes_entries"
           android:entryValues="@array/kprofiles_modes_values"
-          android:defaultValue="@integer/kprofiles_modes_default"
+          android:defaultValue="@string/kprofiles_modes_default"
           android:title="@string/kprofiles_modes_title" 
-          android:summary="%s" />
+          android:summary="%s"
+          android:dependency="@string/pref_key_enabled" />
 
      <com.android.settingslib.widget.FooterPreference
-          android:key="pref_kprofiles_modes_info"
+          android:key="@string/pref_key_modes_info"
           android:title="%s"
           android:selectable="false" />
 

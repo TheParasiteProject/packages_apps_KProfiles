@@ -1,22 +1,5 @@
 package com.android.kprofiles;
 
-import com.android.kprofiles.utils.FileUtils;
-
 public final class Constants {
-    public class Mode {
-        public static final String NONE = "0";
-        public static final String BATTERY = "1";
-        public static final String BALANCED = "2";
-        public static final String PERFORMANCE = "3";
-    }
-
-    public static final String INTENT_ACTION = "com.android.kprofiles.battery.KPROFILE_CHANGED";
-    public static final String KPROFILES_AUTO_KEY = "kprofiles_auto";
-    public static final String KPROFILES_AUTO_NODE = "/sys/module/kprofiles/parameters/auto_kp";
-    public static final String KPROFILES_MODES_KEY = "kprofiles_modes";
-    public static final String KPROFILES_MODES_NODE = "/sys/kernel/kprofiles/kp_mode";
-    public static final String KPROFILES_MODES_INFO = "pref_kprofiles_modes_info";
-    public static final String ON = "Y";
-    public static final String OFF = "N";
-    public static final boolean IS_SUPPORTED = FileUtils.fileExists(KPROFILES_MODES_NODE);
+    public static final String TAG = "KProfiles/Service";
 }
