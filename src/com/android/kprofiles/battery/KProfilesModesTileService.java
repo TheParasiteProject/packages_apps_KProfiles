@@ -1,24 +1,16 @@
 package com.android.kprofiles.battery;
 
-import static com.android.kprofiles.Constants.INTENT_ACTION;
-import static com.android.kprofiles.Constants.IS_SUPPORTED;
-import static com.android.kprofiles.Constants.KPROFILES_MODES_KEY;
-import static com.android.kprofiles.Constants.KPROFILES_MODES_NODE;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.UserHandle;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 
 import androidx.preference.PreferenceManager;
 
-import com.android.kprofiles.Constants.Mode;
 import com.android.kprofiles.R;
-import com.android.kprofiles.utils.FileUtils;
+import com.android.kprofiles.utils.Utils;
 
 public class KProfilesModesTileService extends TileService {
 
@@ -27,9 +19,9 @@ public class KProfilesModesTileService extends TileService {
 
     @Override
     public void onCreate() {
-        if (IS_SUPPORTED) {
+        mContext = getApplicationContext();
+        if (Utils.isModesSupported(mContext)) {
             super.onCreate();
-            mContext = getApplicationContext();
             return;
         }
         Tile tile = getQsTile();
@@ -54,40 +46,38 @@ public class KProfilesModesTileService extends TileService {
 
     @Override
     public void onStartListening() {
-        if (!IS_SUPPORTED) return;
+        if (!Utils.isModesSupported(mContext)) return;
         super.onStartListening();
 
-        // Registering observers
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(INTENT_ACTION);
-        mContext.registerReceiver(mServiceStateReceiver, filter, Context.RECEIVER_EXPORTED);
+        Utils.registerReceiver(mContext, mServiceStateReceiver);
 
         updateTileContent();
     }
 
     @Override
     public void onStopListening() {
-        mContext.unregisterReceiver(mServiceStateReceiver);
+        Utils.unregisterReceiver(mContext, mServiceStateReceiver);
         super.onStopListening();
     }
 
     @Override
     public void onClick() {
-        if (!IS_SUPPORTED) return;
+        if (!Utils.isModesSupported(mContext)) return;
+        if (!Utils.isMainSwitchEnabled(mContext)) {
+            updateTileContent(null);
+            super.onClick();
+            return;
+        }
+
         String mode = getMode();
-        switch (mode) {
-            case Mode.NONE:
-                mode = Mode.BATTERY; // Set mode from none to battery
-                break;
-            case Mode.BATTERY:
-                mode = Mode.BALANCED; // Set mode from battery to balanced
-                break;
-            case Mode.BALANCED:
-                mode = Mode.PERFORMANCE; // Set mode from balanced to performance
-                break;
-            case Mode.PERFORMANCE:
-                mode = Mode.NONE; // Set mode from performance to none
-                break;
+        if (mode.equals(getString(R.string.kprofiles_modes_none))) {
+            mode = getString(R.string.kprofiles_modes_battery);
+        } else if (mode.equals(getString(R.string.kprofiles_modes_battery))) {
+            mode = getString(R.string.kprofiles_modes_balanced);
+        } else if (mode.equals(getString(R.string.kprofiles_modes_balanced))) {
+            mode = getString(R.string.kprofiles_modes_performance);
+        } else if (mode.equals(getString(R.string.kprofiles_modes_performance))) {
+            mode = getString(R.string.kprofiles_modes_none);
         }
         setMode(mode);
         updateTileContent(mode);
@@ -95,18 +85,16 @@ public class KProfilesModesTileService extends TileService {
     }
 
     private void setMode(String mode) {
-        FileUtils.writeLine(KPROFILES_MODES_NODE, mode);
+        Utils.writeToModesNode(mContext, mode);
         mSelfChange = true;
-        Intent intent = new Intent(INTENT_ACTION);
-        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
+        Utils.sendBroadcast(mContext);
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        prefs.edit().putString(KPROFILES_MODES_KEY, mode).apply();
+        prefs.edit().putString(getString(R.string.pref_key_modes), mode).apply();
     }
 
     private String getMode() {
-        final String value = FileUtils.readOneLine(KPROFILES_MODES_NODE);
-        return value != null ? value : Mode.NONE;
+        final String value = Utils.readModesNode(mContext);
+        return value != null ? value : getString(R.string.kprofiles_modes_none);
     }
 
     private void updateTileContent() {
@@ -117,28 +105,29 @@ public class KProfilesModesTileService extends TileService {
         Tile tile = getQsTile();
         if (mode == null) mode = getMode();
 
-        tile.setState(mode != Mode.NONE ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
-        switch (mode) {
-            case Mode.NONE:
-                tile.setContentDescription(getResources().getString(R.string.kprofiles_modes_none));
-                tile.setSubtitle(getResources().getString(R.string.kprofiles_modes_none));
-                break;
-            case Mode.BATTERY:
-                tile.setContentDescription(
-                        getResources().getString(R.string.kprofiles_modes_battery));
-                tile.setSubtitle(getResources().getString(R.string.kprofiles_modes_battery));
-                break;
-            case Mode.BALANCED:
-                tile.setContentDescription(
-                        getResources().getString(R.string.kprofiles_modes_balanced));
-                tile.setSubtitle(getResources().getString(R.string.kprofiles_modes_balanced));
-                break;
-            case Mode.PERFORMANCE:
-                tile.setContentDescription(
-                        getResources().getString(R.string.kprofiles_modes_performance));
-                tile.setSubtitle(getResources().getString(R.string.kprofiles_modes_performance));
-                break;
+        if (!Utils.isMainSwitchEnabled(mContext)) {
+            tile.setState(Tile.STATE_UNAVAILABLE);
+        } else {
+            tile.setState(
+                    !mode.equals(getString(R.string.kprofiles_modes_none))
+                            ? Tile.STATE_ACTIVE
+                            : Tile.STATE_INACTIVE);
         }
+
+        if (mode.equals(getString(R.string.kprofiles_modes_none))) {
+            tile.setContentDescription(getString(R.string.kprofiles_modes_none));
+            tile.setSubtitle(getString(R.string.kprofiles_modes_none));
+        } else if (mode.equals(getString(R.string.kprofiles_modes_battery))) {
+            tile.setContentDescription(getString(R.string.kprofiles_modes_battery));
+            tile.setSubtitle(getString(R.string.kprofiles_modes_battery));
+        } else if (mode.equals(getString(R.string.kprofiles_modes_balanced))) {
+            tile.setContentDescription(getString(R.string.kprofiles_modes_balanced));
+            tile.setSubtitle(getString(R.string.kprofiles_modes_balanced));
+        } else if (mode.equals(getString(R.string.kprofiles_modes_performance))) {
+            tile.setContentDescription(getString(R.string.kprofiles_modes_performance));
+            tile.setSubtitle(getString(R.string.kprofiles_modes_performance));
+        }
+
         tile.updateTile();
     }
 
@@ -146,7 +135,9 @@ public class KProfilesModesTileService extends TileService {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if (!INTENT_ACTION.equals(intent.getAction())) return;
+                    if (!getResources()
+                            .getString(R.string.kprofiles_intent_action)
+                            .equals(intent.getAction())) return;
                     if (mSelfChange) {
                         mSelfChange = false;
                         return;

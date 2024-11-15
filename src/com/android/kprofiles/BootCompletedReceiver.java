@@ -17,13 +17,7 @@
 
 package com.android.kprofiles;
 
-import static com.android.kprofiles.Constants.IS_SUPPORTED;
-import static com.android.kprofiles.Constants.KPROFILES_AUTO_KEY;
-import static com.android.kprofiles.Constants.KPROFILES_AUTO_NODE;
-import static com.android.kprofiles.Constants.KPROFILES_MODES_KEY;
-import static com.android.kprofiles.Constants.KPROFILES_MODES_NODE;
-import static com.android.kprofiles.Constants.OFF;
-import static com.android.kprofiles.Constants.ON;
+import static com.android.kprofiles.Constants.TAG;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,11 +27,10 @@ import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
-import com.android.kprofiles.utils.FileUtils;
+import com.android.kprofiles.utils.Utils;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
     private static final boolean DEBUG = false;
-    private static final String TAG = "KProfiles";
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -45,15 +38,17 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-        if (FileUtils.fileExists(KPROFILES_AUTO_NODE)) {
-            boolean kProfilesAutoEnabled = sharedPrefs.getBoolean(KPROFILES_AUTO_KEY, false);
-            FileUtils.writeLine(KPROFILES_AUTO_NODE, kProfilesAutoEnabled ? ON : OFF);
+        if (Utils.isAutoSupported(context)) {
+            boolean kProfilesAutoEnabled =
+                    sharedPrefs.getBoolean(context.getString(R.string.pref_key_auto), false);
+            Utils.writeToAutoNode(context, kProfilesAutoEnabled);
         }
-        if (IS_SUPPORTED) {
-            String kProfileMode =
+        if (Utils.isModesSupported(context)) {
+            final String kProfileMode =
                     sharedPrefs.getString(
-                            KPROFILES_MODES_KEY, FileUtils.readOneLine(KPROFILES_MODES_NODE));
-            FileUtils.writeLine(KPROFILES_MODES_NODE, kProfileMode);
+                            context.getString(R.string.pref_key_modes),
+                            Utils.readModesNode(context));
+            Utils.writeToModesNode(context, kProfileMode);
         }
     }
 }

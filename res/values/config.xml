@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Main swtich -->
+    <bool name="kprofiles_enabled_default">false</bool>
+
+    <!-- Auto KProfiles -->
+    <bool name="kprofiles_auto_default">false</bool>
+    <string name="kprofiles_auto_node">/sys/module/kprofiles/parameters/auto_kp</string>
+    <string name="kprofiles_auto_on">Y</string>
+    <string name="kprofiles_auto_off">N</string>
+
+    <!-- KProfiles Modes -->
+    <string name="kprofiles_modes_default">@string/kprofiles_modes_value_none</string>
+    <string name="kprofiles_modes_value_none">0</string>
+    <string name="kprofiles_modes_value_battery">1</string>
+    <string name="kprofiles_modes_value_balanced">2</string>
+    <string name="kprofiles_modes_value_performance">3</string>
+    <string name="kprofiles_modes_node">/sys/kernel/kprofiles/kp_mode</string>
+</resources>
