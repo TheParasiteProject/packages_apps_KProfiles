@@ -6,16 +6,16 @@
 
 android_app {
     name: "KProfiles",
-    init_rc: ["init/init.kprofiles.rc"],
     defaults: [
         "SettingsLibDefaults",
     ],
+    init_rc: ["init/init.kprofiles.rc"],
 
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
     ],
-    resource_dirs: ["res"],
+
     certificate: "platform",
     platform_apis: true,
     system_ext_specific: true,
