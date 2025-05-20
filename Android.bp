@@ -21,6 +21,13 @@ android_app {
     system_ext_specific: true,
     privileged: true,
 
+    optimize: {
+        enabled: true,
+        shrink: true,
+        optimize: true,
+        proguard_flags_files: ["proguard.flags"],
+    },
+
     static_libs: [
         "androidx.core_core",
         "androidx.preference_preference",

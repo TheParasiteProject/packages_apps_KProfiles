@@ -1,0 +1,9 @@
+-allowaccessmodification
+-keepclasseswithmembers,allowoptimization,allowaccessmodification class * {
+    public <init>(android.content.Context, android.util.AttributeSet);
+}
+
+-keep,allowoptimization,allowaccessmodification class ** extends androidx.preference.PreferenceFragment
+-keep,allowoptimization,allowaccessmodification class com.android.kprofiles.* {
+    *;
+}
