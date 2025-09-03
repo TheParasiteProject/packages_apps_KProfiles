@@ -16,8 +16,6 @@
 
 package com.android.kprofiles.battery;
 
-import static com.android.kprofiles.Constants.TAG;
-
 import android.os.Bundle;
 
 import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
@@ -27,12 +25,11 @@ public class KprofilesSettingsActivity extends CollapsingToolbarBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getFragmentManager()
+        getSupportFragmentManager()
                 .beginTransaction()
                 .replace(
                         com.android.settingslib.collapsingtoolbar.R.id.content_frame,
-                        new KprofilesSettingsFragment(),
-                        TAG)
+                        new KprofilesSettingsFragment())
                 .commit();
     }
 }

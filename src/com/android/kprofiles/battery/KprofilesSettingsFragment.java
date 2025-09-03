@@ -16,7 +16,6 @@
 
 package com.android.kprofiles.battery;
 
-import android.app.ActionBar;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,14 +29,14 @@ import android.view.ViewGroup;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceChangeListener;
-import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.android.kprofiles.R;
 import com.android.kprofiles.utils.Utils;
 import com.android.settingslib.widget.MainSwitchPreference;
 
-public class KprofilesSettingsFragment extends PreferenceFragment
+public class KprofilesSettingsFragment extends PreferenceFragmentCompat
         implements OnPreferenceChangeListener {
     private MainSwitchPreference kProfilesEnabledPreference;
     private SwitchPreferenceCompat kProfilesAutoPreference;
@@ -61,9 +60,7 @@ public class KprofilesSettingsFragment extends PreferenceFragment
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        addPreferencesFromResource(R.xml.kprofiles_settings);
-        final ActionBar actionBar = getActivity().getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        setPreferencesFromResource(R.xml.kprofiles_settings, rootKey);
 
         kProfilesEnabledPreference =
                 (MainSwitchPreference) findPreference(getString(R.string.pref_key_enabled));
@@ -71,7 +68,7 @@ public class KprofilesSettingsFragment extends PreferenceFragment
 
         kProfilesAutoPreference =
                 (SwitchPreferenceCompat) findPreference(getString(R.string.pref_key_auto));
-        if (Utils.isAutoSupported(getContext())) {
+        if (Utils.isAutoSupported(requireContext())) {
             kProfilesAutoPreference.setOnPreferenceChangeListener(this);
         } else {
             kProfilesAutoPreference.setSummary(R.string.kprofiles_not_supported);
@@ -79,7 +76,7 @@ public class KprofilesSettingsFragment extends PreferenceFragment
         }
         kProfilesModesPreference =
                 (ListPreference) findPreference(getString(R.string.pref_key_modes));
-        final boolean isModesSupported = Utils.isModesSupported(getContext());
+        final boolean isModesSupported = Utils.isModesSupported(requireContext());
         if (isModesSupported) {
             kProfilesModesPreference.setOnPreferenceChangeListener(this);
         } else {
@@ -91,14 +88,14 @@ public class KprofilesSettingsFragment extends PreferenceFragment
 
         updateValues(true);
 
-        Utils.registerReceiver(getContext(), mServiceStateReceiver);
+        Utils.registerReceiver(requireContext(), mServiceStateReceiver);
     }
 
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view =
-                LayoutInflater.from(getContext()).inflate(R.layout.kprofiles, container, false);
+                LayoutInflater.from(requireContext()).inflate(R.layout.kprofiles, container, false);
         ((ViewGroup) view).addView(super.onCreateView(inflater, container, savedInstanceState));
         return view;
     }
@@ -119,7 +116,7 @@ public class KprofilesSettingsFragment extends PreferenceFragment
 
     @Override
     public void onDestroy() {
-        Utils.unregisterReceiver(getContext(), mServiceStateReceiver);
+        Utils.unregisterReceiver(requireContext(), mServiceStateReceiver);
         super.onDestroy();
     }
 
@@ -131,29 +128,20 @@ public class KprofilesSettingsFragment extends PreferenceFragment
             sendBroadcast();
         } else if (key.equals(getString(R.string.pref_key_auto))) {
             final boolean value = (Boolean) newValue;
-            Utils.writeToAutoNode(getContext(), value);
+            Utils.writeToAutoNode(requireContext(), value);
         } else if (key.equals(getString(R.string.pref_key_modes))) {
             final String value = (String) newValue;
-            Utils.writeToModesNode(getContext(), value);
+            Utils.writeToModesNode(requireContext(), value);
             updateTitle(value);
             sendBroadcast();
         }
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            getActivity().onBackPressed();
-            return true;
-        }
-        return false;
-    }
-
     private String modesDesc(String mode) {
         if (mode == null) mode = getString(R.string.kprofiles_modes_value_none);
         String descrpition = null;
-        if (!Utils.isModesSupported(getContext())) {
+        if (!Utils.isModesSupported(requireContext())) {
             return getString(R.string.kprofiles_not_supported);
         }
 
@@ -185,26 +173,26 @@ public class KprofilesSettingsFragment extends PreferenceFragment
 
     private void sendBroadcast() {
         mSelfChange = true;
-        Utils.sendBroadcast(getContext());
+        Utils.sendBroadcast(requireContext());
     }
 
     private void updateValues(boolean updateNodes) {
-        final boolean isMainSwitchEnabled = Utils.isMainSwitchEnabled(getContext());
+        final boolean isMainSwitchEnabled = Utils.isMainSwitchEnabled(requireContext());
 
-        if (Utils.isAutoSupported(getContext())) {
-            final boolean enabled = Utils.isAutoEnabled(getContext());
+        if (Utils.isAutoSupported(requireContext())) {
+            final boolean enabled = Utils.isAutoEnabled(requireContext());
             kProfilesAutoPreference.setChecked(enabled);
             if (updateNodes) {
-                Utils.writeToAutoNode(getContext(), !isMainSwitchEnabled ? false : enabled);
+                Utils.writeToAutoNode(requireContext(), !isMainSwitchEnabled ? false : enabled);
             }
         }
 
-        if (Utils.isModesSupported(getContext())) {
-            final String value = Utils.getMode(getContext());
+        if (Utils.isModesSupported(requireContext())) {
+            final String value = Utils.getMode(requireContext());
             kProfilesModesPreference.setValue(value);
             if (updateNodes) {
                 Utils.writeToModesNode(
-                        getContext(),
+                        requireContext(),
                         !isMainSwitchEnabled
                                 ? getString(R.string.kprofiles_modes_value_none)
                                 : value);
