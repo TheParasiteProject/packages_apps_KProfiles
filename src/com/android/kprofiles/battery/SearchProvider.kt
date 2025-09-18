@@ -25,8 +25,10 @@ import com.android.kprofiles.R
 
 class SearchProvider : SearchIndexablesProvider() {
     override fun onCreate() = true
+
     override fun queryXmlResources(projection: Array<String>?) =
         MatrixCursor(INDEXABLES_XML_RES_COLUMNS)
+
     override fun queryNonIndexableKeys(projection: Array<String>?) =
         MatrixCursor(NON_INDEXABLES_KEYS_COLUMNS)
 
