@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: TheParasiteProject
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package com.android.kprofiles.battery;
 
 import android.content.BroadcastReceiver;
