@@ -11,9 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -50,6 +48,11 @@ public class KprofilesSettingsFragment extends SettingsBasePreferenceFragment
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.kprofiles_settings, rootKey);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         kProfilesEnabledPreference =
                 (MainSwitchPreference) findPreference(getString(R.string.pref_key_enabled));
@@ -81,20 +84,6 @@ public class KprofilesSettingsFragment extends SettingsBasePreferenceFragment
     }
 
     @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view =
-                LayoutInflater.from(requireContext()).inflate(R.layout.kprofiles, container, false);
-        ((ViewGroup) view).addView(super.onCreateView(inflater, container, savedInstanceState));
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         if (kProfilesAutoPreference == null
@@ -104,9 +93,9 @@ public class KprofilesSettingsFragment extends SettingsBasePreferenceFragment
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroyView() {
+        super.onDestroyView();
         Utils.unregisterReceiver(requireContext(), mServiceStateReceiver);
-        super.onDestroy();
     }
 
     @Override
