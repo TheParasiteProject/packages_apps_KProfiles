@@ -14,9 +14,6 @@
     <string name="pref_key_modes" translatable="false">kprofiles_modes</string>
     <string name="pref_key_modes_info" translatable="false">kprofiles_modes_info</string>
 
-    <!-- Intent action -->
-    <string name="kprofiles_intent_action" translatable="false">com.android.kprofiles.battery.KPROFILE_CHANGED</string>
-
     <!-- Entry points in Settings -->
     <string name="kprofiles_title">KProfiles</string>
     <string name="kprofiles_summary">Managing Kernelspace profiles to achieve balancing in terms of battery backup and performance</string>
@@ -43,4 +40,8 @@
 
     <!-- Unsupported -->
     <string name="kprofiles_not_supported">KProfiles is not currently supported by the kernel</string>
+
+    <!-- Battery saver -->
+    <string name="kprofiles_battery_saver_on">Temporarily disabled due to Battery Saver</string>
+
 </resources>
