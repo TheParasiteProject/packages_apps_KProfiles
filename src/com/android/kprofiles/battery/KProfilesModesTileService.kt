@@ -15,19 +15,11 @@ import com.android.kprofiles.utils.getMode
 import com.android.kprofiles.utils.isMainSwitchEnabled
 import com.android.kprofiles.utils.isModesSupported
 import com.android.kprofiles.utils.setMode
-import com.android.kprofiles.utils.writeToModesNode
 
-class KProfilesModesTileService :
-    TileService(),
-    SharedPreferences.OnSharedPreferenceChangeListener,
-    PowerSaveStateManager.PowerSaveStateListener {
+class KProfilesModesTileService : TileService() {
 
     private lateinit var prefs: SharedPreferences
     private lateinit var psm: PowerSaveStateManager
-
-    // Keys
-    private val keyEnabled by lazy { getString(R.string.pref_key_enabled) }
-    private val keyModes by lazy { getString(R.string.pref_key_modes) }
 
     // Modes
     private val modeNone by lazy { getString(R.string.kprofiles_modes_value_none) }
@@ -72,14 +64,10 @@ class KProfilesModesTileService :
         super.onStartListening()
         psm = PowerSaveStateManager.getInstance(this)
         prefs = getDefaultPrefs()
-        prefs.registerOnSharedPreferenceChangeListener(this)
-        psm.registerListener(this)
         updateTileContent()
     }
 
     override fun onStopListening() {
-        psm.unregisterListener(this)
-        prefs.unregisterOnSharedPreferenceChangeListener(this)
         super.onStopListening()
     }
 
@@ -101,19 +89,8 @@ class KProfilesModesTileService :
             }
 
         prefs.setMode(this, nextMode)
-        writeToModesNode(nextMode)
         updateTileContent(nextMode)
         super.onClick()
-    }
-
-    override fun onSharedPreferenceChanged(prefs: SharedPreferences, key: String?) {
-        if (key == keyEnabled || key == keyModes) {
-            updateTileContent()
-        }
-    }
-
-    override fun onPowerSaveStateChanged(enabled: Boolean) {
-        updateTileContent()
     }
 
     private fun updateTileContent(mode: String? = null) {

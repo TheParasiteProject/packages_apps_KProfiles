@@ -6,7 +6,6 @@
 
 package com.android.kprofiles.battery
 
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -24,8 +23,6 @@ import com.android.kprofiles.utils.isAutoEnabled
 import com.android.kprofiles.utils.isAutoSupported
 import com.android.kprofiles.utils.isMainSwitchEnabled
 import com.android.kprofiles.utils.isModesSupported
-import com.android.kprofiles.utils.writeToAutoNode
-import com.android.kprofiles.utils.writeToModesNode
 import com.android.settingslib.widget.FooterPreference
 import com.android.settingslib.widget.MainSwitchPreference
 import com.android.settingslib.widget.SettingsBasePreferenceFragment
@@ -35,10 +32,10 @@ class KprofilesSettingsFragment :
     SharedPreferences.OnSharedPreferenceChangeListener,
     PowerSaveStateManager.PowerSaveStateListener {
 
-    private lateinit var prefs: SharedPreferences
-    private lateinit var psm: PowerSaveStateManager
+    private val prefs by lazy { _context.getDefaultPrefs() }
+    private val psm by lazy { PowerSaveStateManager.getInstance(_context) }
 
-    private val _context: Context by lazy { requireContext() }
+    private val _context by lazy { requireContext() }
 
     // Keys
     private val keyEnabled by lazy { _context.getString(R.string.pref_key_enabled) }
@@ -60,7 +57,20 @@ class KprofilesSettingsFragment :
         _context.getString(R.string.kprofiles_modes_value_performance)
     }
 
+    private val SERVICE_CONTROL_DELAY_MS = 500L
     private val mainHandler: Handler = Handler(Looper.getMainLooper())
+
+    private val controlServiceRunnable = Runnable {
+        val enabled = prefs.isMainSwitchEnabled(_context)
+        prefEnabled?.apply { setChecked(enabled) }
+        val serviceIntent = Intent(_context, KProfilesService::class.java)
+
+        if (enabled) {
+            _context.startServiceAsUser(serviceIntent, UserHandle.CURRENT)
+        } else {
+            _context.stopServiceAsUser(serviceIntent, UserHandle.CURRENT)
+        }
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.kprofiles_settings, rootKey)
@@ -72,60 +82,51 @@ class KprofilesSettingsFragment :
         preferenceManager.setStorageDeviceProtected()
         preferenceManager.sharedPreferencesName = PREFS_NAME
 
-        psm = PowerSaveStateManager.getInstance(_context)
-        prefs = _context.getDefaultPrefs()
+        psm.registerListener(this)
         prefs.registerOnSharedPreferenceChangeListener(this)
 
         updateEnabled()
-        updateAutoEnabled(true)
-        updateModes(true)
+        updateAutoEnabled()
+        updateModes()
     }
 
     override fun onResume() {
         super.onResume()
         updateEnabled()
-        updateAutoEnabled(false)
-        updateModes(false)
+        updateAutoEnabled()
+        updateModes()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         psm.unregisterListener(this)
         prefs.unregisterOnSharedPreferenceChangeListener(this)
+        mainHandler.removeCallbacks(controlServiceRunnable)
     }
 
     override fun onSharedPreferenceChanged(prefs: SharedPreferences, key: String?) {
         when (key) {
             keyEnabled -> {
                 updateEnabled()
-                updateAutoEnabled(true)
-                updateModes(true)
+                updateAutoEnabled()
+                updateModes()
             }
-            keyAuto -> updateAutoEnabled(true)
-            keyModes -> updateModes(true)
+            keyAuto -> updateAutoEnabled()
+            keyModes -> updateModes()
         }
     }
 
     override fun onPowerSaveStateChanged(enabled: Boolean) {
-        updateModes(false)
-        updateAutoEnabled(false)
+        updateModes()
+        updateAutoEnabled()
     }
 
     private fun updateEnabled() {
-        val enabled = prefs.isMainSwitchEnabled(_context)
-        prefEnabled?.apply { setChecked(enabled) }
-        val serviceIntent = Intent(_context, KProfilesService::class.java)
-        if (enabled) {
-            _context.startServiceAsUser(serviceIntent, UserHandle.CURRENT)
-            psm.registerListener(this)
-        } else {
-            _context.stopServiceAsUser(serviceIntent, UserHandle.CURRENT)
-            psm.unregisterListener(this)
-            psm.onDestroy()
-        }
+        mainHandler.removeCallbacks(controlServiceRunnable)
+        mainHandler.postDelayed(controlServiceRunnable, SERVICE_CONTROL_DELAY_MS)
     }
 
-    private fun updateAutoEnabled(updateNodes: Boolean) {
+    private fun updateAutoEnabled() {
         if (!_context.isAutoSupported()) {
             prefAuto?.let { preferenceScreen?.removePreference(it) }
             return
@@ -141,19 +142,9 @@ class KprofilesSettingsFragment :
 
         val enabled = prefs.isAutoEnabled(_context)
         prefAuto?.setChecked(enabled)
-
-        if (!updateNodes) return
-
-        _context.writeToAutoNode(
-            if (!isMainSwitchEnabled) {
-                false
-            } else {
-                enabled
-            }
-        )
     }
 
-    private fun updateModes(updateNodes: Boolean) {
+    private fun updateModes() {
         if (!_context.isModesSupported()) {
             prefModes?.let { preferenceScreen?.removePreference(it) }
             return
@@ -170,16 +161,6 @@ class KprofilesSettingsFragment :
         val value = prefs.getMode(_context)
         prefModes?.setValue(value)
         updateModesInfo(value)
-
-        if (!updateNodes) return
-
-        _context.writeToModesNode(
-            if (!isMainSwitchEnabled) {
-                modeNone
-            } else {
-                value
-            }
-        )
     }
 
     private fun modesDesc(mode: String?): String {
@@ -219,7 +200,7 @@ class KprofilesSettingsFragment :
                 prefModesInfo?.setTitle(
                     String.format(
                         getString(R.string.kprofiles_modes_description),
-                        R.string.kprofiles_battery_saver_on,
+                        getString(R.string.kprofiles_battery_saver_on),
                     )
                 )
             }

@@ -13,8 +13,6 @@ import android.content.Intent
 import android.os.UserHandle
 import com.android.kprofiles.battery.KProfilesService
 import com.android.kprofiles.utils.getDefaultPrefs
-import com.android.kprofiles.utils.getMode
-import com.android.kprofiles.utils.isAutoEnabled
 import com.android.kprofiles.utils.isAutoSupported
 import com.android.kprofiles.utils.isMainSwitchEnabled
 import com.android.kprofiles.utils.isModesSupported
@@ -48,12 +46,5 @@ class BootCompletedReceiver : BroadcastReceiver() {
             Intent(context, KProfilesService::class.java),
             UserHandle.CURRENT,
         )
-
-        if (autoSupported) {
-            context.writeToAutoNode(prefs.isAutoEnabled(context))
-        }
-        if (modeSupported) {
-            context.writeToModesNode(prefs.getMode(context))
-        }
     }
 }

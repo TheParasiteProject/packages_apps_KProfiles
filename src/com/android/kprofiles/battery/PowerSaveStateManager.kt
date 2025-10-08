@@ -27,10 +27,7 @@ internal class PowerSaveStateManager private constructor(private val context: Co
     private val receiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                val listenersCopy: HashSet<PowerSaveStateListener>
-                synchronized(listenersLock) { listenersCopy = HashSet(listeners) }
-                val isPowerSave = powerManager.isPowerSaveMode()
-                listenersCopy.forEach { listener -> listener.onPowerSaveStateChanged(isPowerSave) }
+                notifyStateChanges()
             }
         }
 
@@ -38,6 +35,7 @@ internal class PowerSaveStateManager private constructor(private val context: Co
         if (!isReceiverRegistered) {
             context.registerReceiver(receiver, intentFilter, Context.RECEIVER_EXPORTED)
             isReceiverRegistered = true
+            notifyStateChanges()
         }
     }
 
@@ -49,10 +47,19 @@ internal class PowerSaveStateManager private constructor(private val context: Co
         }
     }
 
+    fun notifyStateChanges() {
+        val isPowerSave = powerManager.isPowerSaveMode()
+        val listenersCopy: HashSet<PowerSaveStateListener>
+        synchronized(listenersLock) { listenersCopy = HashSet(listeners) }
+        listenersCopy.forEach { listener -> listener.onPowerSaveStateChanged(isPowerSave) }
+    }
+
     fun isPowerSaveMode(): Boolean = powerManager.isPowerSaveMode()
 
     fun registerListener(listener: PowerSaveStateListener) {
         synchronized(listenersLock) { listeners.add(listener) }
+        val isPowerSave = powerManager.isPowerSaveMode()
+        listener.onPowerSaveStateChanged(isPowerSave)
     }
 
     fun unregisterListener(listener: PowerSaveStateListener) {
@@ -71,10 +78,5 @@ internal class PowerSaveStateManager private constructor(private val context: Co
                             instance = it
                         }
                 }
-
-        fun destroy() {
-            instance?.onDestroy()
-            instance = null
-        }
     }
 }
