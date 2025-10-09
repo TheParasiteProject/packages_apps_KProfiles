@@ -6,11 +6,16 @@
 package com.android.kprofiles.battery
 
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.os.IBinder
+import android.os.PowerManager
 import android.service.quicksettings.TileService
+import com.android.kprofiles.ACTION_KPROFILE_CHANGED
 import com.android.kprofiles.R
 import com.android.kprofiles.utils.getDefaultPrefs
 import com.android.kprofiles.utils.getMode
@@ -20,10 +25,7 @@ import com.android.kprofiles.utils.isModesSupported
 import com.android.kprofiles.utils.writeToAutoNode
 import com.android.kprofiles.utils.writeToModesNode
 
-class KProfilesService :
-    Service(),
-    PowerSaveStateManager.PowerSaveStateListener,
-    SharedPreferences.OnSharedPreferenceChangeListener {
+class KProfilesService : Service() {
 
     enum class State {
         MAIN_ENABLED,
@@ -43,7 +45,31 @@ class KProfilesService :
     private val tileComponent by lazy { ComponentName(this, KProfilesModesTileService::class.java) }
 
     private val prefs: SharedPreferences by lazy { getDefaultPrefs() }
-    private val psm by lazy { PowerSaveStateManager.getInstance(this) }
+    private val powerManager: PowerManager by lazy { getSystemService(PowerManager::class.java) }
+    private val intentFilter =
+        IntentFilter().also {
+            it.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+            it.addAction(ACTION_KPROFILE_CHANGED)
+        }
+    private val receiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (context == null || intent == null) {
+                    return
+                }
+
+                when (intent.action) {
+                    ACTION_KPROFILE_CHANGED -> {
+                        updateAutoNode(State.MAIN_ENABLED)
+                        updateModesNode(State.MAIN_ENABLED)
+                    }
+                    PowerManager.ACTION_POWER_SAVE_MODE_CHANGED -> {
+                        updateTileContent()
+                        onPowerSaveStateChanged(powerManager.isPowerSaveMode())
+                    }
+                }
+            }
+        }
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -51,11 +77,15 @@ class KProfilesService :
 
     override fun onCreate() {
         super.onCreate()
-        psm.registerListener(this)
-        prefs.registerOnSharedPreferenceChangeListener(this)
+        registerReceiver(receiver, intentFilter, Context.RECEIVER_EXPORTED)
         updateTileContent()
 
-        val state = if (psm.isPowerSaveMode()) State.POWERSAVE else State.MAIN_ENABLED
+        val state =
+            if (powerManager.isPowerSaveMode()) {
+                State.POWERSAVE
+            } else {
+                State.MAIN_ENABLED
+            }
         updateAutoNode(state)
         updateModesNode(state)
     }
@@ -65,29 +95,19 @@ class KProfilesService :
     }
 
     override fun onDestroy() {
-        prefs.unregisterOnSharedPreferenceChangeListener(this)
-        psm.unregisterListener(this)
-        updateTileContent()
+        unregisterReceiver(receiver)
         updateAutoNode(State.MAIN_DISABLED)
         updateModesNode(State.MAIN_DISABLED)
         super.onDestroy()
     }
 
-    override fun onSharedPreferenceChanged(prefs: SharedPreferences, key: String?) {
-        val state = if (psm.isPowerSaveMode()) State.POWERSAVE else State.MAIN_ENABLED
-
-        when (key) {
-            keyAuto -> {
-                updateAutoNode(state)
+    fun onPowerSaveStateChanged(enabled: Boolean) {
+        val state =
+            if (enabled) {
+                State.POWERSAVE
+            } else {
+                State.MAIN_ENABLED
             }
-            keyModes -> {
-                updateModesNode(state)
-            }
-        }
-    }
-
-    override fun onPowerSaveStateChanged(enabled: Boolean) {
-        val state = if (enabled) State.POWERSAVE else State.MAIN_ENABLED
         updateAutoNode(state)
         updateModesNode(state)
     }
@@ -99,7 +119,11 @@ class KProfilesService :
         writeToAutoNode(
             when (state) {
                 State.MAIN_ENABLED -> {
-                    savedAuto
+                    if (powerManager.isPowerSaveMode()) {
+                        false
+                    } else {
+                        savedAuto
+                    }
                 }
                 State.MAIN_DISABLED -> {
                     false
@@ -122,7 +146,11 @@ class KProfilesService :
         writeToModesNode(
             when (state) {
                 State.MAIN_ENABLED -> {
-                    savedMode
+                    if (powerManager.isPowerSaveMode()) {
+                        modeBattery
+                    } else {
+                        savedMode
+                    }
                 }
                 State.MAIN_DISABLED -> {
                     modeNone
@@ -136,7 +164,6 @@ class KProfilesService :
                 }
             }
         )
-        updateTileContent()
     }
 
     private fun updateTileContent() {

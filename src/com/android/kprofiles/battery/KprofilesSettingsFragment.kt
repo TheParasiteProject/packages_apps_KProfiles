@@ -6,15 +6,22 @@
 
 package com.android.kprofiles.battery
 
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.os.UserHandle
+import android.service.quicksettings.TileService
 import android.view.View
 import androidx.preference.ListPreference
 import androidx.preference.SwitchPreferenceCompat
+import com.android.kprofiles.ACTION_KPROFILE_CHANGED
 import com.android.kprofiles.R
 import com.android.kprofiles.utils.PREFS_NAME
 import com.android.kprofiles.utils.getDefaultPrefs
@@ -28,14 +35,47 @@ import com.android.settingslib.widget.MainSwitchPreference
 import com.android.settingslib.widget.SettingsBasePreferenceFragment
 
 class KprofilesSettingsFragment :
-    SettingsBasePreferenceFragment(),
-    SharedPreferences.OnSharedPreferenceChangeListener,
-    PowerSaveStateManager.PowerSaveStateListener {
+    SettingsBasePreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     private val prefs by lazy { _context.getDefaultPrefs() }
-    private val psm by lazy { PowerSaveStateManager.getInstance(_context) }
 
     private val _context by lazy { requireContext() }
+    private val powerManager: PowerManager by lazy {
+        _context.getSystemService(PowerManager::class.java)
+    }
+    private var selfChange: Boolean = false
+    private val intentFilter =
+        IntentFilter().also {
+            it.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+            it.addAction(ACTION_KPROFILE_CHANGED)
+        }
+    private val localIntent =
+        Intent().also {
+            it.setAction(ACTION_KPROFILE_CHANGED)
+            it.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
+        }
+    private val serviceIntent by lazy { Intent(_context, KProfilesService::class.java) }
+    private val receiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (context == null || intent == null) {
+                    return
+                }
+
+                when (intent.action) {
+                    ACTION_KPROFILE_CHANGED -> {
+                        if (selfChange) {
+                            selfChange = false
+                            return
+                        }
+                        updateModes()
+                    }
+                    PowerManager.ACTION_POWER_SAVE_MODE_CHANGED -> {
+                        onPowerSaveStateChanged(powerManager.isPowerSaveMode())
+                    }
+                }
+            }
+        }
 
     // Keys
     private val keyEnabled by lazy { _context.getString(R.string.pref_key_enabled) }
@@ -57,19 +97,23 @@ class KprofilesSettingsFragment :
         _context.getString(R.string.kprofiles_modes_value_performance)
     }
 
-    private val SERVICE_CONTROL_DELAY_MS = 500L
+    // Tile
+    private val tileComponent by lazy {
+        ComponentName(_context, KProfilesModesTileService::class.java)
+    }
+
+    private val SERVICE_CONTROL_DELAY_MS = 300L
     private val mainHandler: Handler = Handler(Looper.getMainLooper())
 
     private val controlServiceRunnable = Runnable {
-        val enabled = prefs.isMainSwitchEnabled(_context)
-        prefEnabled?.apply { setChecked(enabled) }
-        val serviceIntent = Intent(_context, KProfilesService::class.java)
-
-        if (enabled) {
+        if (prefs.isMainSwitchEnabled(_context)) {
             _context.startServiceAsUser(serviceIntent, UserHandle.CURRENT)
         } else {
             _context.stopServiceAsUser(serviceIntent, UserHandle.CURRENT)
         }
+
+        selfChange = true
+        _context.sendBroadcastAsUser(localIntent, UserHandle.CURRENT)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -82,12 +126,13 @@ class KprofilesSettingsFragment :
         preferenceManager.setStorageDeviceProtected()
         preferenceManager.sharedPreferencesName = PREFS_NAME
 
-        psm.registerListener(this)
         prefs.registerOnSharedPreferenceChangeListener(this)
+        _context.registerReceiver(receiver, intentFilter, Context.RECEIVER_EXPORTED)
 
         updateEnabled()
         updateAutoEnabled()
         updateModes()
+        updateTileContent()
     }
 
     override fun onResume() {
@@ -95,11 +140,12 @@ class KprofilesSettingsFragment :
         updateEnabled()
         updateAutoEnabled()
         updateModes()
+        updateTileContent()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        psm.unregisterListener(this)
+        _context.unregisterReceiver(receiver)
         prefs.unregisterOnSharedPreferenceChangeListener(this)
         mainHandler.removeCallbacks(controlServiceRunnable)
     }
@@ -108,20 +154,34 @@ class KprofilesSettingsFragment :
         when (key) {
             keyEnabled -> {
                 updateEnabled()
-                updateAutoEnabled()
-                updateModes()
+                updateTileContent()
             }
-            keyAuto -> updateAutoEnabled()
-            keyModes -> updateModes()
+            keyAuto -> {
+                updateAutoEnabled()
+                selfChange = true
+                _context.sendBroadcastAsUser(localIntent, UserHandle.CURRENT)
+            }
+            keyModes -> {
+                updateModes()
+                selfChange = true
+                _context.sendBroadcastAsUser(localIntent, UserHandle.CURRENT)
+                updateTileContent()
+            }
         }
     }
 
-    override fun onPowerSaveStateChanged(enabled: Boolean) {
+    fun onPowerSaveStateChanged(enabled: Boolean) {
         updateModes()
         updateAutoEnabled()
     }
 
     private fun updateEnabled() {
+        val enabled = prefs.isMainSwitchEnabled(_context)
+        prefEnabled?.apply { setChecked(enabled) }
+
+        updateAutoEnabled()
+        updateModes()
+
         mainHandler.removeCallbacks(controlServiceRunnable)
         mainHandler.postDelayed(controlServiceRunnable, SERVICE_CONTROL_DELAY_MS)
     }
@@ -132,13 +192,8 @@ class KprofilesSettingsFragment :
             return
         }
 
-        if (psm.isPowerSaveMode()) {
-            prefAuto?.setEnabled(false)
-            return
-        }
-
         val isMainSwitchEnabled = prefs.isMainSwitchEnabled(_context)
-        prefAuto?.setEnabled(isMainSwitchEnabled)
+        prefAuto?.setEnabled(isMainSwitchEnabled && !powerManager.isPowerSaveMode())
 
         val enabled = prefs.isAutoEnabled(_context)
         prefAuto?.setChecked(enabled)
@@ -150,13 +205,8 @@ class KprofilesSettingsFragment :
             return
         }
 
-        if (psm.isPowerSaveMode()) {
-            prefModes?.setEnabled(false)
-            return
-        }
-
         val isMainSwitchEnabled = prefs.isMainSwitchEnabled(_context)
-        prefModes?.setEnabled(isMainSwitchEnabled)
+        prefModes?.setEnabled(isMainSwitchEnabled && !powerManager.isPowerSaveMode())
 
         val value = prefs.getMode(_context)
         prefModes?.setValue(value)
@@ -195,26 +245,23 @@ class KprofilesSettingsFragment :
             return
         }
 
-        if (psm.isPowerSaveMode()) {
-            mainHandler.post {
-                prefModesInfo?.setTitle(
-                    String.format(
-                        getString(R.string.kprofiles_modes_description),
-                        getString(R.string.kprofiles_battery_saver_on),
-                    )
-                )
-            }
-            prefModesInfo?.setEnabled(false)
-            return
-        }
-
         val isMainSwitchEnabled = prefs.isMainSwitchEnabled(_context)
-        prefModesInfo?.setEnabled(isMainSwitchEnabled)
+        val powerSave = powerManager.isPowerSaveMode()
+        prefModesInfo?.setEnabled(isMainSwitchEnabled && !powerSave)
 
-        mainHandler.post {
-            prefModesInfo?.setTitle(
+        prefModesInfo?.setTitle(
+            if (powerSave) {
+                String.format(
+                    getString(R.string.kprofiles_modes_description),
+                    getString(R.string.kprofiles_battery_saver_on),
+                )
+            } else {
                 String.format(getString(R.string.kprofiles_modes_description), modesDesc(value))
-            )
-        }
+            }
+        )
+    }
+
+    private fun updateTileContent() {
+        TileService.requestListeningState(_context, tileComponent)
     }
 }

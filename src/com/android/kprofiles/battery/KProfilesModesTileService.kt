@@ -5,10 +5,14 @@
 
 package com.android.kprofiles.battery
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.drawable.Icon
+import android.os.PowerManager
+import android.os.UserHandle
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import com.android.kprofiles.ACTION_KPROFILE_CHANGED
 import com.android.kprofiles.R
 import com.android.kprofiles.utils.getDefaultPrefs
 import com.android.kprofiles.utils.getMode
@@ -19,7 +23,12 @@ import com.android.kprofiles.utils.setMode
 class KProfilesModesTileService : TileService() {
 
     private lateinit var prefs: SharedPreferences
-    private lateinit var psm: PowerSaveStateManager
+    private lateinit var powerManager: PowerManager
+    private val localIntent =
+        Intent().also {
+            it.setAction(ACTION_KPROFILE_CHANGED)
+            it.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
+        }
 
     // Modes
     private val modeNone by lazy { getString(R.string.kprofiles_modes_value_none) }
@@ -36,6 +45,9 @@ class KProfilesModesTileService : TileService() {
     }
 
     override fun onCreate() {
+        powerManager = getSystemService(PowerManager::class.java)
+        prefs = getDefaultPrefs()
+
         if (isModesSupported()) {
             super.onCreate()
             return
@@ -62,8 +74,6 @@ class KProfilesModesTileService : TileService() {
     override fun onStartListening() {
         if (!isModesSupported()) return
         super.onStartListening()
-        psm = PowerSaveStateManager.getInstance(this)
-        prefs = getDefaultPrefs()
         updateTileContent()
     }
 
@@ -73,7 +83,7 @@ class KProfilesModesTileService : TileService() {
 
     override fun onClick() {
         if (!isModesSupported()) return
-        if (!prefs.isMainSwitchEnabled(this) || psm.isPowerSaveMode()) {
+        if (!prefs.isMainSwitchEnabled(this) || powerManager.isPowerSaveMode()) {
             updateTileContent()
             super.onClick()
             return
@@ -89,22 +99,24 @@ class KProfilesModesTileService : TileService() {
             }
 
         prefs.setMode(this, nextMode)
+        sendBroadcastAsUser(localIntent, UserHandle.CURRENT)
         updateTileContent(nextMode)
         super.onClick()
     }
 
     private fun updateTileContent(mode: String? = null) {
         val tile: Tile = getQsTile()
+        val powerSave = powerManager.isPowerSaveMode()
 
-        if (psm.isPowerSaveMode()) {
+        if (powerSave || !prefs.isMainSwitchEnabled(this)) {
             tile.setState(Tile.STATE_UNAVAILABLE)
-            tile.setSubtitle(getString(R.string.kprofiles_battery_saver_on))
-            tile.updateTile()
-            return
-        }
-
-        if (!prefs.isMainSwitchEnabled(this)) {
-            tile.setState(Tile.STATE_UNAVAILABLE)
+            tile.setSubtitle(
+                if (powerSave) {
+                    getString(R.string.kprofiles_battery_saver_on)
+                } else {
+                    null
+                }
+            )
             tile.updateTile()
             return
         }

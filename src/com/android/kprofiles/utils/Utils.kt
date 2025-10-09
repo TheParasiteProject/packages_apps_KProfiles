@@ -62,7 +62,7 @@ fun SharedPreferences.isAutoEnabled(context: Context): Boolean {
 }
 
 fun SharedPreferences.setMode(context: Context, mode: String) {
-    edit().putString(context.getString(R.string.pref_key_modes), mode).commit()
+    edit().putString(context.getString(R.string.pref_key_modes), mode).apply()
 }
 
 fun SharedPreferences.getMode(context: Context): String {
