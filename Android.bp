@@ -32,7 +32,6 @@ android_app {
         "androidx.core_core",
         "androidx.core_core-ktx",
         "androidx.preference_preference",
-        "kotlin-reflect",
         "kotlin-stdlib",
         "kotlin-stdlib-jdk7",
         "SettingsLib",
